@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  background: #fff;
+  overflow-x: hidden;
+  font-family: var(--font-playfair), serif;
+}
+
+/* global.css */
+.font-heading {
+  font-family: var(--font-playfair), serif;
+}
+
+.font-body {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+
+/* Custom styles for Swiper navigation buttons */
+.custom-swiper .swiper-button-prev,
+.custom-swiper .swiper-button-next {
+  background-color: white;
+  color: black;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Reduce the size of the arrow icons */
+.custom-swiper .swiper-button-prev::after,
+.custom-swiper .swiper-button-next::after {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Position the buttons horizontally centered */
+.custom-swiper .swiper-button-prev {
+  left: -0px;
+  top: 55%;
+  transform: translateY(-50%);
+}
+
+.custom-swiper .swiper-button-next {
+  right: -0px;
+  top: 55%;
+  transform: translateY(-50%);
+}
+
+/* Make sure the pagination dots are visible */
+.custom-swiper .swiper-pagination-bullet {
+  background-color: #000;
+  opacity: 0.5;
+}
+
+.custom-swiper .swiper-pagination-bullet-active {
+  background-color: #000;
+  opacity: 1;
+}
+
