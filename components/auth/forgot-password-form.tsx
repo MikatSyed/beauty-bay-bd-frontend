@@ -11,6 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useToast } from "../ui/use-toast"
+import { useForgotPasswordMutation } from "@/redux/api/authApi"
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({
@@ -21,8 +23,11 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>
 
 export function ForgotPasswordForm() {
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const [forgotPassword] = useForgotPasswordMutation()
 
   const form = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -31,15 +36,34 @@ export function ForgotPasswordForm() {
     },
   })
 
-  function onSubmit(data: ForgotPasswordValues) {
+
+  async function onSubmit(data: ForgotPasswordValues) {
     setIsLoading(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      // Fixed: Pass email in the correct format
+      const result = await forgotPassword(data).unwrap();
+      console.log(result,'29')
+      
       setIsSubmitted(true)
-      console.log(data)
-    }, 1500)
+      // Fixed: Correct success message for forgot password
+      toast({
+        title: "Reset link sent!",
+        description: "Check your email for the password reset link.",
+        variant: "success"
+      })
+
+    } catch (error: any) {
+      // Improved error handling
+      const errorMessage = error?.message || "Failed to send reset email"
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isSubmitted) {
@@ -88,7 +112,7 @@ export function ForgotPasswordForm() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="name@example.com"
+                
                     type="email"
                     autoComplete="email"
                     disabled={isLoading}

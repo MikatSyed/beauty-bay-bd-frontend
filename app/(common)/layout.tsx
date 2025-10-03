@@ -1,9 +1,7 @@
 "use client";
 
-
 import Footer from "@/components/pages/home/footer";
-
-import { Navbar } from "@/components/pages/home/Navbar";
+import Navbar from "@/components/pages/home/navbar";
 import TopHeader from "@/components/pages/home/top-header";
 
 

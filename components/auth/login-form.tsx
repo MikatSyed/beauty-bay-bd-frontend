@@ -5,13 +5,17 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Loader2, Eye, EyeOff } from "lucide-react"
-
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { useLoginMutation } from "@/redux/api/authApi"
+import { useToast } from "../ui/use-toast"
+import { storeUserInfo } from "@/services/auth.service"
+import { useRouter } from "next/navigation"
 
 const loginFormSchema = z.object({
   email: z.string().email({
@@ -26,8 +30,13 @@ const loginFormSchema = z.object({
 type LoginFormValues = z.infer<typeof loginFormSchema>
 
 export function LoginForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const { toast } = useToast();
+  const {push} = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  const [login] = useLoginMutation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -38,18 +47,31 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(data: LoginFormValues) {
+
+  async function onSubmit(data: LoginFormValues) {
     setIsLoading(true)
+    try {
+      const result = await login(data).unwrap()
+        if (result?.data?.accessToken) {
+        storeUserInfo({ accessToken: result?.data?.accessToken });
+        toast({
+          title: "Success!",
+          description: "You have been logged in.",
+        });
 
-    // Simulate API call
-    setTimeout(() => {
+        push(`/`);
+      }
+    } catch (err: any) {
+      console.log(err, "78")
+      toast({
+        title: "Registration failed",
+        description: err?.message || "Something went wrong",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-      console.log(data)
-      // In a real app, you would redirect to the dashboard or home page after successful login
-      window.location.href = "/dashboard"
-    }, 1500)
+    }
   }
-
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -62,7 +84,7 @@ export function LoginForm() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="name@example.com"
+               
                     type="email"
                     autoComplete="email"
                     disabled={isLoading}
@@ -91,7 +113,7 @@ export function LoginForm() {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      placeholder="••••••••"
+                   
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       disabled={isLoading}
@@ -158,6 +180,7 @@ export function LoginForm() {
 
       <div className="grid grid-cols-2 gap-4">
         <Button
+          onClick={() => signIn("google",{callbackUrl:"/"})}
           variant="outline"
           type="button"
           disabled={isLoading}

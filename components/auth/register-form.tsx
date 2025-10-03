@@ -12,13 +12,16 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { useSignupMutation } from "@/redux/api/authApi"
+import { useToast } from "@/components/ui/use-toast"
+
 
 const registerFormSchema = z
   .object({
-    firstName: z.string().min(2, {
+    fname: z.string().min(2, {
       message: "First name must be at least 2 characters.",
     }),
-    lastName: z.string().min(2, {
+    lname: z.string().min(2, {
       message: "Last name must be at least 2 characters.",
     }),
     email: z.string().email({
@@ -44,13 +47,16 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { toast } = useToast()
+
+  const [signup] = useSignupMutation()
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      fname: "",
+      lname: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -58,32 +64,56 @@ export function RegisterForm() {
     },
   })
 
-  function onSubmit(data: RegisterFormValues) {
+  async function onSubmit(data: RegisterFormValues) {
     setIsLoading(true)
+    try {
+      const result = await signup(data).unwrap()
+      console.log(result)
 
-    // Simulate API call
-    setTimeout(() => {
+      toast({
+        title: "Registration successful!",
+        description: "Your account has been created. Please check your email to verify your account.",
+        variant: "success",
+      })
+    } catch (err: any) {
+      console.log(err, "78")
+      toast({
+        title: "Registration failed",
+        description: err?.message || "Something went wrong",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-      console.log(data)
-      // In a real app, you would redirect to the dashboard or home page after successful registration
-      window.location.href = "/dashboard"
-    }, 1500)
+    }
   }
 
+
   return (
-    <div className="space-y-6">
+   <>
+     <Button
+        onClick={() =>
+          toast({
+            title: "Registration successful!",
+            description: "Your account has been created 🚀",
+              variant: "success",
+          })
+        }
+      >
+        Show Toast
+      </Button>
+     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
-              name="firstName"
+              name="fname"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="John"
+                    
                       autoComplete="given-name"
                       disabled={isLoading}
                       className="h-12 rounded-lg border-gray-200 bg-white focus-visible:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:focus-visible:ring-purple-500"
@@ -96,13 +126,13 @@ export function RegisterForm() {
             />
             <FormField
               control={form.control}
-              name="lastName"
+              name="lname"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Doe"
+                     
                       autoComplete="family-name"
                       disabled={isLoading}
                       className="h-12 rounded-lg border-gray-200 bg-white focus-visible:ring-purple-500 dark:border-gray-700 dark:bg-gray-800 dark:focus-visible:ring-purple-500"
@@ -122,7 +152,7 @@ export function RegisterForm() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="name@example.com"
+                
                     type="email"
                     autoComplete="email"
                     disabled={isLoading}
@@ -143,7 +173,7 @@ export function RegisterForm() {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      placeholder="••••••••"
+                 
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
                       disabled={isLoading}
@@ -180,7 +210,7 @@ export function RegisterForm() {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      placeholder="••••••••"
+                    
                       type={showConfirmPassword ? "text" : "password"}
                       autoComplete="new-password"
                       disabled={isLoading}
@@ -297,5 +327,6 @@ export function RegisterForm() {
         </Button>
       </div>
     </div>
+   </>
   )
 }

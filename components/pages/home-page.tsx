@@ -1,7 +1,6 @@
 import React from 'react';
 import PromoBar from './home/promo-bar';
 import TopHeader from './home/top-header';
-import { Navbar } from './home/Navbar';
 import Slider from './home/slider';
 import Categories from './home/categories';
 import NewArrival from './home/new-arrival';
@@ -13,6 +12,8 @@ import SkinCare from './home/skin-care';
 import Brands from './home/brands';
 import Blog from './home/blog';
 import Footer from './home/footer';
+import Navbar from './home/navbar'
+
 
 const HomePage = () => {
     return (

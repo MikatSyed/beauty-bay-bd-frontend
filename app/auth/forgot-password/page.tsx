@@ -24,12 +24,7 @@ export default function ForgotPasswordPage() {
 
           <ForgotPasswordForm />
 
-          <div className="mt-8 text-center text-sm">
-            Remember your password?{" "}
-            <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400">
-              Back to sign in
-            </Link>
-          </div>
+      
         </div>
       </div>
 

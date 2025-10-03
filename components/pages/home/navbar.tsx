@@ -115,7 +115,7 @@ const categoryData: Record<string, any> = {
   },
 }
 
-export function Navbar() {
+export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>("")
   const [activeBrandLetter, setActiveBrandLetter] = React.useState<string>("ALL")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
