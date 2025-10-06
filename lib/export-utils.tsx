@@ -1,4 +1,5 @@
-import { Category } from "@/app/dashboard/settings/categories/page"
+
+import { Category } from "@/components/dashboard/settings/categories/category-page"
 import { format } from "date-fns"
 
 
