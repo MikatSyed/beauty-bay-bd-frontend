@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { RxCross1 } from "react-icons/rx"
-import { CiMenuBurger } from "react-icons/ci"
+import * as React from "react";
+import Link from "next/link";
+import { RxCross1 } from "react-icons/rx";
+import { CiMenuBurger } from "react-icons/ci";
 
-const mainNavItems = [
+type NavItem = { title: string; href: string };
+
+const mainNavItems: NavItem[] = [
   { title: "Brands", href: "/brands" },
   { title: "New & Tranding", href: "/new" },
   { title: "Offers", href: "/offers" },
@@ -18,9 +20,38 @@ const mainNavItems = [
   { title: "Men's", href: "/food-supplement" },
   { title: "Blog", href: "/combo" },
   { title: "More Products", href: "/combo" },
-]
+];
 
-const brandLetters = [
+type BrandLetter =
+  | "ALL"
+  | "0-9"
+  | "A"
+  | "B"
+  | "C"
+  | "D"
+  | "E"
+  | "F"
+  | "G"
+  | "H"
+  | "I"
+  | "J"
+  | "K"
+  | "L"
+  | "M"
+  | "N"
+  | "O"
+  | "P"
+  | "Q"
+  | "R"
+  | "S"
+  | "T"
+  | "U"
+  | "V"
+  | "W"
+  | "Y"
+  | "Z";
+
+const brandLetters: BrandLetter[] = [
   "ALL",
   "0-9",
   "A",
@@ -48,20 +79,53 @@ const brandLetters = [
   "W",
   "Y",
   "Z",
-]
+];
 
-const allBrands: any = {
-  ALL: ["Adidas", "Armani", "Burberry", "Balenciaga", "Chanel", "Calvin Klein", "Dior", "Estee Lauder", "7Up", "3M"],
+const allBrands: Record<BrandLetter, string[]> = {
+  ALL: [
+    "Adidas",
+    "Armani",
+    "Burberry",
+    "Balenciaga",
+    "Chanel",
+    "Calvin Klein",
+    "Dior",
+    "Estee Lauder",
+    "7Up",
+    "3M",
+  ],
+  "0-9": ["7Up", "3M"],
   A: ["Adidas", "Armani"],
   B: ["Burberry", "Balenciaga"],
   C: ["Chanel", "Calvin Klein"],
   D: ["Dior"],
   E: ["Estee Lauder"],
-  "0-9": ["7Up", "3M"],
-}
+  F: [],
+  G: [],
+  H: [],
+  I: [],
+  J: [],
+  K: [],
+  L: [],
+  M: [],
+  N: [],
+  O: [],
+  P: [],
+  Q: [],
+  R: [],
+  S: [],
+  T: [],
+  U: [],
+  V: [],
+  W: [],
+  Y: [],
+  Z: [],
+};
 
-// Sample data for other dropdown categories
-const categoryData: Record<string, any> = {
+type CategorySections = Record<string, string[]>; // e.g. { face: ["Foundation", ...] }
+type CategoryData = Record<string, CategorySections>;
+
+const categoryData: CategoryData = {
   "New & Tranding": {
     categories: ["New Arrivals", "Best Sellers", "Limited Edition", "Exclusive Collections"],
     featured: ["Spring Collection 2024", "Summer Essentials", "Celebrity Picks"],
@@ -113,46 +177,54 @@ const categoryData: Record<string, any> = {
     tools: ["Mirrors", "Tweezers", "Eyelash Curlers", "Sharpeners"],
     gifts: ["Gift Cards", "Gift Sets", "Special Occasions"],
   },
+};
+
+function cn(...classes: Array<string | false | null | undefined>): string {
+  return classes.filter(Boolean).join(" ");
 }
 
-export default function Navbar() {
-  const [activeDropdown, setActiveDropdown] = React.useState<string | null>("")
-  const [activeBrandLetter, setActiveBrandLetter] = React.useState<string>("ALL")
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+const Navbar: React.FC = () => {
+  const [activeDropdown, setActiveDropdown] = React.useState<string | null>("");
+  const [activeBrandLetter, setActiveBrandLetter] = React.useState<BrandLetter>("ALL");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState<boolean>(false);
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
+  const toggleMobileMenu = (): void => setIsMobileMenuOpen((s) => !s);
 
-  function cn(...classes: string[]): string {
-    return classes.filter(Boolean).join(" ")
-  }
-
-  // Function to render dropdown content based on active dropdown
-  const renderDropdownContent = () => {
-    if (!activeDropdown) return null
+  const renderDropdownContent = (): React.ReactNode => {
+    if (!activeDropdown) return null;
 
     if (activeDropdown === "Brands") {
       return (
-        <div className="container mx-auto px-4 py-4">
+        <div className="mx-auto max-w-[2100px] px-7 py-4">
           <div className="flex flex-wrap gap-2 text-sm border-b pb-2">
             {brandLetters.map((letter) => (
               <button
+                type="button"
                 key={letter}
                 onMouseEnter={() => setActiveBrandLetter(letter)}
                 className={cn(
-                  "px-2 py-1 transition",
-                  activeBrandLetter === letter ? "bg-[#fa9aac] text-white" : "text-gray-800 hover:text-red-500",
+                  "px-2 py-1 rounded transition",
+                  activeBrandLetter === letter
+                    ? "bg-[#fa9aac] text-white"
+                    : "text-gray-800 hover:text-pink-600"
                 )}
               >
                 {letter}
               </button>
             ))}
-            <button className="px-2 py-1 text-black hover:text-red-500 transition">View All Brands</button>
+            <button type="button" className="px-2 py-1 text-black hover:text-pink-600 transition">
+              View All Brands
+            </button>
           </div>
-          <div className="mt-2">
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-              {(allBrands[activeBrandLetter] || []).map((brand: any) => (
+
+          <div className="mt-3">
+            <ul className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 text-sm">
+              {(allBrands[activeBrandLetter] || []).map((brand) => (
                 <li key={brand}>
-                  <Link href={`/brands/${brand.toLowerCase()}`} className="text-gray-600 hover:text-pink-500">
+                  <Link
+                    href={`/brands/${brand.toLowerCase()}`}
+                    className="block p-2 rounded text-gray-700 hover:text-white hover:bg-[#fa9aac] transition-colors"
+                  >
                     {brand}
                   </Link>
                 </li>
@@ -160,26 +232,25 @@ export default function Navbar() {
             </ul>
           </div>
         </div>
-      )
+      );
     }
 
-    // For other dropdown items
-    const data = categoryData[activeDropdown]
-    if (!data) return null
+    const data = categoryData[activeDropdown];
+    if (!data) return null;
 
     return (
-      <div className="container mx-auto px-4 py-4 ">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {Object.entries(data).map(([category, items]: [string, any]) => (
-            <div key={category} className="mb-4 ">
-              <h3 className="font-medium  mb-2 capitalize  p-2">{category}</h3>
-              <hr  className="my-2"/>
+      <div className="mx-auto max-w-[2100px] px-7 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 ">
+          {Object.entries(data).map(([category, items]) => (
+            <div key={category}>
+              <h3 className="text-[12px] font-semibold text-gray-900 mb-2 capitalize">{category}</h3>
+              <hr className="mb-3 border-pink-200" />
               <ul className="space-y-1">
-                {items.map((item: string) => (
-                  <li key={item} className="w-full">
+                {items.map((item) => (
+                  <li key={item}>
                     <Link
                       href={`/${activeDropdown.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="block w-full p-2 text-gray-600 hover:bg-[#fa9aac] hover:text-white text-sm transition-colors duration-200"
+                      className="block w-full p-2 text-gray-700 hover:bg-[#fa9aac] hover:text-white rounded transition-colors"
                     >
                       {item}
                     </Link>
@@ -190,31 +261,39 @@ export default function Navbar() {
           ))}
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <nav className="relative z-50">
+      {/* Top row with desktop nav */}
       <div className="py-3">
-        <div className="container  px-7">
+        <div className="mx-auto max-w-[2100px] px-7">
           <div className="flex items-center justify-between lg:justify-start">
-            <button className="text-black lg:hidden" onClick={toggleMobileMenu} aria-label="Toggle menu">
+            {/* Mobile toggle */}
+            <button
+              type="button"
+              className="text-black lg:hidden"
+              onClick={toggleMobileMenu}
+              aria-label="Toggle menu"
+            >
               {isMobileMenuOpen ? <RxCross1 size={24} /> : <CiMenuBurger size={24} />}
             </button>
-           <ul className="hidden lg:flex items-center space-x-10 text-[13px]">
-  {mainNavItems.map((item) => (
-    <li key={item.title} className="whitespace-nowrap">
-      <Link
-        href={item.href}
-        className="block py-2 font-medium text-black hover:text-pink-600 whitespace-nowrap"
-        onMouseEnter={() => setActiveDropdown(item.title)}
-      >
-        {item.title}
-      </Link>
-    </li>
-  ))}
-</ul>
 
+            {/* Desktop nav (left-aligned, larger text) */}
+            <ul className="hidden lg:flex space-x-10 text-[15px] md:text-[16px] font-semibold">
+              {mainNavItems.map((item) => (
+                <li key={item.title} className="whitespace-nowrap">
+                  <Link
+                    href={item.href}
+                    className="block py-2 text-gray-800 hover:text-pink-600 transition-colors"
+                    onMouseEnter={() => setActiveDropdown(item.title)}
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>
@@ -222,7 +301,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white shadow-md">
-          <div className="container mx-auto px-4 py-2">
+          <div className="mx-auto max-w-[2100px] px-7 py-2">
             <ul className="space-y-2">
               {mainNavItems.map((item) => (
                 <li key={item.title}>
@@ -240,16 +319,17 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Dropdown content for all nav items */}
+      {/* Dropdown (desktop only) */}
       {activeDropdown && (
         <div
-          className="absolute left-0 right-0 bg-white hidden lg:block shadow-md"
+          className="absolute left-0 right-0 bg-white hidden lg:block shadow-md border-t"
           onMouseLeave={() => setActiveDropdown(null)}
         >
           {renderDropdownContent()}
         </div>
       )}
     </nav>
-  )
-}
+  );
+};
 
+export default Navbar;

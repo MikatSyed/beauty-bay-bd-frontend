@@ -20,7 +20,7 @@ const sliderData = [
   {
     id: 1,
     image:
-      "/assets/slider/AdobeStock_1211526367_Preview.jpeg",
+      "/assets/slider/AdobeStock_969080310_Preview.jpeg",
     title: "Summer Essentials",
     subtitle: "EXCLUSIVE COLLECTION",
     description:
@@ -49,8 +49,9 @@ const sliderData = [
   },
   {
     id: 3,
+  
     image:
-      "/assets/slider/AdobeStock_969080310_Preview.jpeg",
+      " /assets/slider/AdobeStock_1211526367_Preview.jpeg",
     title: "Signature Collection",
     subtitle: "NEW ARRIVALS",
     description:
@@ -117,7 +118,7 @@ const Slider = () => {
   }
 
   return (
-    <div className="relative overflow-hidden" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div className="relative overflow-hidden " onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       {/* Premium Slider */}
       <Swiper
         onSwiper={(swiper) => (swiperRef.current = swiper)}
@@ -136,70 +137,127 @@ const Slider = () => {
           disableOnInteraction: false,
         }}
         onSlideChange={handleSlideChange}
-        className="w-full premium-swiper h-[700px] md:h-[800px]"
+        className="w-full premium-swiper h-[700px] md:h-[1000px] "
       >
-        {sliderData.map((slide) => (
-          <SwiperSlide key={slide.id}>
-            <div className="relative w-full h-full overflow-hidden">
-              {/* Background Image */}
-              <div className="absolute inset-0 w-full h-full">
-                <Image
-                  src={slide.image || "/placeholder.svg"}
-                  alt={slide.title}
-                  fill
-                  priority
-                  className="object-cover"
-                />
-              </div>
+    {sliderData.map((slide) => (
+  <SwiperSlide key={slide.id}>
+    {/* Full-bleed slide wrapper */}
+    <div className="relative h-full w-full overflow-hidden">
+      {/* Full-width BG */}
+      <div
+        className="absolute inset-0 bg-no-repeat bg-cover bg-center"
+        style={{ backgroundImage: `url(${slide.image})` }}
+        aria-hidden
+      />
 
-              {/* Gradient Overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-r ${slide.accent}`}></div>
+      {/* Gradient Overlay (also full width) */}
+      <div className={`absolute inset-0 bg-gradient-to-r ${slide.accent}`} />
 
-              {/* Content */}
-              <div
-                className={`absolute inset-0 flex items-center ${slide.position === "right" ? "justify-end" : "justify-start"}`}
+    {/* Centered, max-width content */}
+{/* Centered, max-width content */}
+<div className="relative z-10 h-full">
+  <div className="mx-auto h-full w-full max-w-[2100px]">
+    <div
+      className={[
+        "flex h-full items-center  ",
+        slide.position === "right"
+          ? "justify-end"
+          : slide.position === "center"
+          ? "justify-center"
+          : "justify-start",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "flex flex-col py-20 md:py-28",
+          "space-y-8 md:space-y-10",
+          "max-w-2xl md:max-w-3xl",
+          slide.position === "right"
+            ? "items-end text-right"
+            : slide.position === "center"
+            ? "items-center text-center"
+            : "items-start",
+        ].join(" ")}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={slide.id}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.5 }}
+            className="w-full"
+          >
+            {/* Subtitle */}
+            <span
+              className={[
+                "inline-flex items-center rounded-full",
+                "px-4 py-1.5",
+                "text-xs md:text-sm tracking-[0.2em] uppercase",
+                "bg-white/10 backdrop-blur-sm",
+                slide.textColor,
+              ].join(" ")}
+            >
+              {slide.subtitle}
+            </span>
+
+            {/* Title */}
+            <h2
+              className={[
+                "mt-5",
+                "font-serif font-bold tracking-tight",
+                // Bigger title sizes
+                "text-5xl leading-[1.05]",
+                "md:text-7xl md:leading-[1.05]",
+                slide.textColor,
+              ].join(" ")}
+            >
+              {slide.title}
+            </h2>
+
+            {/* Description */}
+            <p
+              className={[
+                "mt-5 md:mt-6",
+                // Bigger body sizes
+                "text-lg md:text-xl",
+                "leading-relaxed opacity-90",
+                slide.textColor,
+              ].join(" ")}
+            >
+              {slide.description}
+            </p>
+
+            {/* CTA */}
+            <div className="pt-8 md:pt-10">
+              <a
+                href={slide.link}
+                className={[
+                  "group inline-flex items-center gap-2",
+                  "px-7 md:px-8 py-3.5 md:py-4",
+                  "text-base md:text-lg font-medium",
+                  "rounded-none border border-transparent",
+                  "transition-all duration-300",
+                  "focus:outline-none focus-visible:ring focus-visible:ring-white/60",
+                  slide.buttonStyle,
+                ].join(" ")}
               >
-                <div
-                  className={`flex flex-col ${slide.position === "right" ? "items-end text-right pr-6 md:pr-20" : "items-start text-left pl-6 md:pl-20"} max-w-lg space-y-6`}
-                >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={slide.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.5 }}
-                      className="space-y-6"
-                    >
-                      <div>
-                        <span className={`inline-block font-light tracking-widest text-sm mb-2 ${slide.textColor}`}>
-                          {slide.subtitle}
-                        </span>
-                        <h2 className={`font-serif text-4xl md:text-6xl font-bold ${slide.textColor} leading-tight`}>
-                          {slide.title}
-                        </h2>
-                      </div>
-
-                      <p className={`text-sm md:text-base ${slide.textColor} opacity-90 max-w-md leading-relaxed`}>
-                        {slide.description}
-                      </p>
-
-                      <div className="pt-2">
-                        <a
-                          href={slide.link}
-                          className={`group inline-flex items-center gap-2 px-6 py-3 rounded-none border border-transparent ${slide.buttonStyle} transition-all duration-300 font-medium`}
-                        >
-                          <span>{slide.cta}</span>
-                          <FiArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                        </a>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
+                <span>{slide.cta}</span>
+                <FiArrowRight className="h-5 w-5 transform transition-transform group-hover:translate-x-1" />
+              </a>
             </div>
-          </SwiperSlide>
-        ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+  </SwiperSlide>
+))}
+
       </Swiper>
 
       {/* Custom Navigation */}
@@ -213,7 +271,7 @@ const Slider = () => {
         </button>
 
         {/* Slide Indicators */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ">
           {sliderData.map((_, index) => (
             <button
               key={index}

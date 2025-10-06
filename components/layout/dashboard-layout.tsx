@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -23,6 +22,8 @@ import {
   FileIcon as FileInvoice,
   Sun,
   Moon,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -44,9 +45,10 @@ import { Badge } from "@/components/ui/badge"
 
 interface NavItem {
   title: string
-  href: string
+  href?: string
   icon: React.ComponentType<{ className?: string }>
   badge?: string
+  children?: NavItem[] // 👈 support dropdown
 }
 
 const navItems: NavItem[] = [
@@ -99,8 +101,12 @@ const navItems: NavItem[] = [
   },
   {
     title: "Settings",
-    href: "/dashboard/settings",
     icon: Settings,
+    children: [
+      { title: "Categories", href: "/dashboard/settings/categories", icon: Tag },
+      { title: "Subcategories", href: "/dashboard/settings/subcategories", icon: Package },
+      { title: "Users", href: "/dashboard/settings/users", icon: Users },
+    ],
   },
   {
     title: "Support",
@@ -109,21 +115,105 @@ const navItems: NavItem[] = [
   },
 ]
 
+/**
+ * Sidebar Nav Component with dropdown support
+ */
+function SidebarNav({ items }: { items: NavItem[] }) {
+  const pathname = usePathname()
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) => ({ ...prev, [title]: !prev[title] }))
+  }
+
+  return (
+    <div className="flex flex-col gap-1 p-4">
+      {items.map((item) =>
+        item.children ? (
+          <div key={item.title}>
+            <button
+              onClick={() => toggleMenu(item.title)}
+              className={cn(
+                "group flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-pink-50 hover:text-pink-700 dark:hover:bg-pink-950 dark:hover:text-pink-300",
+                pathname.startsWith(item.href || "")
+                  ? "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
+                  : "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <item.icon className="h-5 w-5" />
+                <span>{item.title}</span>
+              </div>
+              {openMenus[item.title] ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
+            {openMenus[item.title] && (
+              <div className="ml-8 mt-1 flex flex-col gap-1">
+                {item.children.map((child) => (
+                  <Link
+                    key={child.href}
+                    href={child.href!}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-pink-50 hover:text-pink-700 dark:hover:bg-pink-950 dark:hover:text-pink-300",
+                      pathname === child.href
+                        ? "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    <child.icon className="h-4 w-4" />
+                    {child.title}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            key={item.href}
+            href={item.href!}
+            className={cn(
+              "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-pink-50 hover:text-pink-700 dark:hover:bg-pink-950 dark:hover:text-pink-300",
+              pathname === item.href
+                ? "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
+                : "text-muted-foreground"
+            )}
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.title}</span>
+            {item.badge && (
+              <Badge variant="outline" className="ml-auto">
+                {item.badge}
+              </Badge>
+            )}
+          </Link>
+        )
+      )}
+    </div>
+  )
+}
+
+/**
+ * Dashboard Layout
+ */
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // After mounting, we can safely show the UI that depends on the theme
   useEffect(() => {
     setMounted(true)
   }, [])
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* HEADER */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between py-4">
+          {/* Mobile Nav */}
           <div className="flex items-center gap-2">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
@@ -136,37 +226,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <div className="px-7">
                   <Link href="/" className="flex items-center gap-2 font-semibold" onClick={() => setOpen(false)}>
                     <div className="relative h-6 w-6 overflow-hidden rounded-full bg-gradient-to-br from-pink-500 to-purple-500">
-                      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
-                        B
-                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">B</div>
                     </div>
                     <span className="text-lg font-bold">Beauty Admin</span>
                   </Link>
                 </div>
                 <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10">
-                  <div className="pl-6 pr-8">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-pink-50 hover:text-pink-700 dark:hover:bg-pink-950 dark:hover:text-pink-300",
-                          pathname === item.href
-                            ? "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                        {item.badge && (
-                          <Badge variant="outline" className="ml-auto">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
+                  <SidebarNav items={navItems} />
                 </ScrollArea>
               </SheetContent>
             </Sheet>
@@ -177,6 +243,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <span className="text-lg font-bold">Beauty Admin</span>
             </Link>
           </div>
+
+          {/* Header Right */}
           <div className="flex items-center gap-4">
             <div className="relative hidden md:block">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -237,31 +305,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </header>
+
+      {/* SIDEBAR + MAIN */}
       <div className="flex flex-1">
         <aside className="fixed left-0 top-16 hidden h-[calc(100vh-4rem)] w-64 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:block">
           <ScrollArea className="h-full">
-            <div className="flex flex-col gap-1 p-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium hover:bg-pink-50 hover:text-pink-700 dark:hover:bg-pink-950 dark:hover:text-pink-300",
-                    pathname === item.href
-                      ? "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300"
-                      : "text-muted-foreground",
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.title}</span>
-                  {item.badge && (
-                    <Badge variant="outline" className="ml-auto">
-                      {item.badge}
-                    </Badge>
-                  )}
-                </Link>
-              ))}
-            </div>
+            <SidebarNav items={navItems} />
           </ScrollArea>
         </aside>
         <main className="flex-1 overflow-auto bg-muted/10 md:ml-64">{children}</main>
