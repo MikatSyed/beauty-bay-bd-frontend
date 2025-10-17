@@ -5,6 +5,7 @@ import { AddCategoryForm } from "../../../../components/dashboard/settings/add-c
 import { CategoriesTable } from "../../../../components/dashboard/settings/categories/categories-table"
 import { EditCategoryModal } from "../../../../components/dashboard/settings/categories/edit-category-modal"
 import { DeleteModal } from "../../../../components/dashboard/settings/categories/delete-modal"
+import { ProductsTable } from "@/components/products/products-table"
 
 export interface Category {
   id: string
@@ -110,6 +111,8 @@ const initialCategories: Category[] = [
   },
 ]
 
+
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -166,22 +169,23 @@ export default function CategoriesPage() {
 
       <AddCategoryForm onSubmit={handleAddCategory} />
 
-      <CategoriesTable categories={categories} onEdit={setEditingCategory} onDelete={setDeletingCategory} />
+      {/* <CategoriesTable categories={categories} onEdit={setEditingCategory} onDelete={setDeletingCategory} /> */}
+      <ProductsTable />
 
-      <EditCategoryModal
+      {/* <EditCategoryModal
         category={editingCategory}
         open={!!editingCategory}
         onClose={() => setEditingCategory(null)}
         onSubmit={handleEditCategory}
-      />
+      /> */}
 
-      <DeleteModal
+      {/* <DeleteModal
         open={!!deletingCategory}
         onClose={() => setDeletingCategory(null)}
         onConfirm={handleDeleteCategory}
         title="Delete Category"
         description={`Are you sure you want to delete "${deletingCategory?.name}"? This action cannot be undone.`}
-      />
+      /> */}
     </div>
   )
 }

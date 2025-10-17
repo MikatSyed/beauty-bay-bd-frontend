@@ -1,48 +1,85 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Upload, X, ImageIcon } from "lucide-react"
+import { Plus } from "lucide-react"
+import MultipleImageUpload from "@/components/ui/multiple-image-upload"
+import { useAddCategoryMutation } from "@/redux/api/categoryApi"
+import { toast } from "@/components/ui/use-toast"
 
-interface AddCategoryFormProps {
-  onSubmit: (data: { name: string; image: File | null }) => void
+// Zod + React Hook Form imports
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+// ✅ Validation Schema
+const categoryFormSchema = z.object({
+  name: z.string().min(1, "Category name is required"),
+  images: z.array(z.any()).optional(),
+})
+
+type CategoryFormValues = z.infer<typeof categoryFormSchema>
+
+interface CategoryImage {
+  id: number
+  url: string
 }
 
-export function AddCategoryForm({ onSubmit }: AddCategoryFormProps) {
-  const [name, setName] = useState("")
-  const [image, setImage] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>("")
+export function AddCategoryForm() {
+  const [categoryImgs, setCategoryImgs] = useState<CategoryImage[]>([])
+  const [imgError, setImgError] = useState<string | null>(null)
+  const [addCategory, { isLoading }] = useAddCategoryMutation()
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+  const form = useForm<CategoryFormValues>({
+    resolver: zodResolver(categoryFormSchema),
+    defaultValues: {
+      name: "",
+      images: [],
+    },
+  })
+
+  // ✅ Submit handler
+async function onSubmit(data: CategoryFormValues) {
+  try {
+    if (categoryImgs.length === 0) {
+      setImgError("Please upload at least one image.")
+      return
     }
-  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!name.trim()) return
+    setImgError(null)
 
-    onSubmit({ name, image })
-    setName("")
-    setImage(null)
-    setImagePreview("")
-  }
+    // ✅ Convert image objects to URLs
+    data.images = categoryImgs.map((img) => img.url)
 
-  const clearImage = () => {
-    setImage(null)
-    setImagePreview("")
+    // ✅ Create JSON payload (matches your backend)
+    const payload = {
+      name: data.name,
+      images: data.images,
+    }
+
+    // ✅ Send as JSON (NOT FormData)
+    await addCategory(payload).unwrap()
+
+    toast({
+      title: "Category Added",
+      description: "New category created successfully!",
+      variant: "success",
+    })
+
+    form.reset()
+    setCategoryImgs([])
+  } catch (err: any) {
+    console.error(err)
+    toast({
+      title: "Error",
+      description: err?.message || "Failed to create category",
+      variant: "destructive",
+    })
   }
+}
 
   return (
     <Card className="border-gray-200 dark:border-gray-700 shadow-none">
@@ -50,8 +87,10 @@ export function AddCategoryForm({ onSubmit }: AddCategoryFormProps) {
         <CardTitle className="text-2xl">Add New Category</CardTitle>
         <CardDescription>Create a new product category with name and image</CardDescription>
       </CardHeader>
+
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Category Name */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
               Category Name
@@ -59,69 +98,30 @@ export function AddCategoryForm({ onSubmit }: AddCategoryFormProps) {
             <Input
               id="name"
               placeholder="Enter category name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              {...form.register("name")}
               className="h-12 rounded-lg border-gray-300 bg-white focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:border-pink-500 dark:border-gray-600 dark:bg-gray-800 dark:focus-visible:ring-pink-500 dark:focus-visible:border-pink-500"
             />
+            {form.formState.errors.name && (
+              <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="image" className="text-sm font-medium">
-              Category Image
-            </Label>
-            <div className="relative">
-              <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              <label
-                htmlFor="image"
-                className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer transition-all hover:border-pink-400 hover:bg-pink-50/50 dark:hover:bg-pink-950/20 border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800/50 focus-within:ring-2 focus-within:ring-pink-500 focus-within:border-pink-500"
-              >
-                {imagePreview ? (
-                  <div className="relative w-full h-full p-4">
-                    <img
-                      src={imagePreview || "/placeholder.svg"}
-                      alt="Preview"
-                      className="w-full h-full object-contain rounded"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        clearImage()
-                      }}
-                      className="absolute top-2 right-2 h-8 w-8 rounded-full bg-red-500 hover:bg-red-600 shadow-none"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-2 py-6">
-                    <div className="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30">
-                      <ImageIcon className="h-8 w-8 text-pink-600 dark:text-pink-400" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Click to upload image</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Upload className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-                      <span className="text-xs font-medium text-pink-600 dark:text-pink-400">Browse Files</span>
-                    </div>
-                  </div>
-                )}
-              </label>
-            </div>
-            {image && !imagePreview && <p className="text-sm text-muted-foreground">{image.name}</p>}
-          </div>
+          {/* Multiple Image Upload */}
+          <MultipleImageUpload
+            images={categoryImgs}
+            setImages={setCategoryImgs}
+            setError={setImgError}
+            error={imgError}
+          />
 
+          {/* Submit Button */}
           <Button
             type="submit"
+            disabled={isLoading}
             className="h-12 w-full md:w-auto px-8 rounded-lg bg-pink-600 text-white hover:bg-pink-700 dark:bg-pink-600 dark:hover:bg-pink-700 shadow-none"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Category
+            {isLoading ? "Adding..." : "Add Category"}
           </Button>
         </form>
       </CardContent>
