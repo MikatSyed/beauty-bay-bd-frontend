@@ -2,10 +2,11 @@
 
 import { useState } from "react"
 import { AddCategoryForm } from "../../../../components/dashboard/settings/add-category-form"
-import { CategoriesTable } from "../../../../components/dashboard/settings/categories/categories-table"
+
 import { EditCategoryModal } from "../../../../components/dashboard/settings/categories/edit-category-modal"
 import { DeleteModal } from "../../../../components/dashboard/settings/categories/delete-modal"
 import { ProductsTable } from "@/components/products/products-table"
+import CategoriesTable from "./categories-table"
 
 export interface Category {
   id: string
@@ -170,7 +171,7 @@ export default function CategoriesPage() {
       <AddCategoryForm onSubmit={handleAddCategory} />
 
       {/* <CategoriesTable categories={categories} onEdit={setEditingCategory} onDelete={setDeletingCategory} /> */}
-      <ProductsTable />
+      <CategoriesTable />
 
       {/* <EditCategoryModal
         category={editingCategory}

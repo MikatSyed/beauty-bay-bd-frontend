@@ -9,8 +9,6 @@ import { Plus } from "lucide-react"
 import MultipleImageUpload from "@/components/ui/multiple-image-upload"
 import { useAddCategoryMutation } from "@/redux/api/categoryApi"
 import { toast } from "@/components/ui/use-toast"
-
-// Zod + React Hook Form imports
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
